@@ -1,17 +1,15 @@
-'use client'
-
-import { Card, CardContent } from "@/components/ui/card"
-import { Users, BookOpen, Trophy } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, BookOpen, Trophy } from "lucide-react";
+import { PerformanceChart } from "@/components/performance-chart";
 
 const data = [
-  { name: 'Jan', students: 65, grades: 70 },
-  { name: 'Feb', students: 85, grades: 80 },
-  { name: 'Mar', students: 95, grades: 85 },
-  { name: 'Apr', students: 75, grades: 90 },
-  { name: 'May', students: 85, grades: 95 },
-  { name: 'Jun', students: 95, grades: 85 },
-]
+  { name: "Jan", students: 65, grades: 70 },
+  { name: "Feb", students: 85, grades: 80 },
+  { name: "Mar", students: 95, grades: 85 },
+  { name: "Apr", students: 75, grades: 90 },
+  { name: "May", students: 85, grades: 95 },
+  { name: "Jun", students: 95, grades: 85 },
+];
 
 const upcomingDeadlines = [
   {
@@ -19,16 +17,16 @@ const upcomingDeadlines = [
     title: "Math Quiz",
     date: "17th April",
     class: "Grade 8",
-    type: "Assessment"
+    type: "Assessment",
   },
   {
     id: 2,
     title: "Science Project",
     date: "20th April",
     class: "Grade 7",
-    type: "Project"
-  }
-]
+    type: "Project",
+  },
+];
 
 export default function DashboardPage() {
   return (
@@ -82,28 +80,7 @@ export default function DashboardPage() {
                 <option>Last Month</option>
               </select>
             </div>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="students" 
-                    stroke="#7B3FF2" 
-                    strokeWidth={2}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="grades" 
-                    stroke="#38BDF8" 
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <PerformanceChart data={data} />
           </CardContent>
         </Card>
 
@@ -119,10 +96,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-4">
               {upcomingDeadlines.map((deadline) => (
-                <div
-                  key={deadline.id}
-                  className="p-4 rounded-lg bg-white/10"
-                >
+                <div key={deadline.id} className="p-4 rounded-lg bg-white/10">
                   <p className="font-semibold">{deadline.title}</p>
                   <div className="mt-2 text-sm text-white/80">
                     <p>Date: {deadline.date}</p>
@@ -136,6 +110,5 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

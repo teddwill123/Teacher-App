@@ -1,19 +1,31 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPage() {
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [pushNotifications, setPushNotifications] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
 
   return (
     <div className="space-y-6">
@@ -54,7 +66,11 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" defaultValue="antonio@example.com" type="email" />
+                  <Input
+                    id="email"
+                    defaultValue="antonio@example.com"
+                    type="email"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="subject">Primary Subject</Label>
@@ -106,7 +122,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between space-x-2">
-                <Label htmlFor="email-notifications" className="flex flex-col space-y-1">
+                <Label
+                  htmlFor="email-notifications"
+                  className="flex flex-col space-y-1"
+                >
                   <span>Email Notifications</span>
                   <span className="font-normal text-sm text-muted-foreground">
                     Receive notifications via email
@@ -119,7 +138,10 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="flex items-center justify-between space-x-2">
-                <Label htmlFor="push-notifications" className="flex flex-col space-y-1">
+                <Label
+                  htmlFor="push-notifications"
+                  className="flex flex-col space-y-1"
+                >
                   <span>Push Notifications</span>
                   <span className="font-normal text-sm text-muted-foreground">
                     Receive notifications via push notifications
@@ -192,6 +214,5 @@ export default function SettingsPage() {
         <Button>Save Changes</Button>
       </div>
     </div>
-  )
+  );
 }
-
