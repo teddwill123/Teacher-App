@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,23 +17,94 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { FileDown, FileText, Image } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { FileDown } from "lucide-react";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+
+interface MainPoint {
+  heading: string;
+  content: string;
+  examples: string[];
+}
+
+interface Note {
+  title: string;
+  introduction: string;
+  mainPoints: MainPoint[];
+  conclusion: string;
+  visualAidPrompt: string;
+}
 
 export default function NotesPage() {
-  const mockNote = {
-    introduction:
-      "In this lesson, we will explore the fascinating world of photosynthesis, a crucial process that sustains life on Earth.",
-    mainPoints: [
-      "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce oxygen and energy in the form of sugar.",
-      "The process takes place in the chloroplasts, specifically using the green pigment chlorophyll.",
-      "The overall reaction can be summarized as: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2",
-      "Factors affecting photosynthesis include light intensity, carbon dioxide concentration, and temperature.",
-    ],
-    conclusion:
-      "Understanding photosynthesis is crucial as it forms the basis of most food chains and is responsible for maintaining the balance of oxygen in our atmosphere.",
-    visualAid: "/placeholder.svg?height=300&width=400",
+  const [loading, setLoading] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [gradeLevel, setGradeLevel] = useState("");
+  const [complexity, setComplexity] = useState("");
+  const [generatedNote, setGeneratedNote] = useState<Note | null>(null);
+
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          topic,
+          gradeLevel,
+          complexity,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate notes");
+      }
+
+      const data = await response.json();
+      setGeneratedNote(data);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!generatedNote) return;
+
+    const content = `# ${generatedNote.title}
+
+## Introduction
+${generatedNote.introduction}
+
+## Main Points
+${generatedNote.mainPoints
+  .map(
+    (point) => `
+### ${point.heading}
+${point.content}
+
+Examples:
+${point.examples.map((example) => `- ${example}`).join("\n")}
+`
+  )
+  .join("\n")}
+
+## Conclusion
+${generatedNote.conclusion}
+`;
+
+    const blob = new Blob([content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${generatedNote.title.toLowerCase().replace(/\s+/g, "-")}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -44,16 +117,34 @@ export default function NotesPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="topics">Topics or Themes</Label>
+            <Label htmlFor="topics">Topic</Label>
             <Input
               id="topics"
               placeholder="e.g., Photosynthesis, World War II"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
             />
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="grade-level">Grade Level</Label>
-            <Select>
-              <SelectTrigger id="grade-level">
+            <Label htmlFor="grade">Grade Level</Label>
+            <Select value={gradeLevel} onValueChange={setGradeLevel}>
+              <SelectTrigger id="grade">
+                <SelectValue placeholder="Select grade level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="elementary">Elementary School</SelectItem>
+                <SelectItem value="middle">Middle School</SelectItem>
+                <SelectItem value="high">High School</SelectItem>
+                <SelectItem value="college">College</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="complexity">Complexity Level</Label>
+            <Select value={complexity} onValueChange={setComplexity}>
+              <SelectTrigger id="complexity">
                 <SelectValue placeholder="Select complexity" />
               </SelectTrigger>
               <SelectContent>
@@ -63,76 +154,70 @@ export default function NotesPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Depth of Content</Label>
-            <Slider defaultValue={[50]} max={100} step={1} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tone">Tone</Label>
-            <Select>
-              <SelectTrigger id="tone">
-                <SelectValue placeholder="Select tone" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="formal">Formal</SelectItem>
-                <SelectItem value="neutral">Neutral</SelectItem>
-                <SelectItem value="casual">Casual</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch id="include-visuals" />
-            <Label htmlFor="include-visuals">Include Visual Aids</Label>
-          </div>
         </CardContent>
         <CardFooter>
-          <Button>Generate Notes</Button>
+          <Button
+            className="w-full"
+            onClick={handleGenerate}
+            disabled={loading || !topic || !gradeLevel || !complexity}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Notes"
+            )}
+          </Button>
         </CardFooter>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Generated Notes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-semibold">Introduction:</h3>
-            <p>{mockNote.introduction}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Main Points:</h3>
-            <ul className="list-disc pl-5">
-              {mockNote.mainPoints.map((point, index) => (
-                <li key={index}>{point}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold">Conclusion:</h3>
-            <p>{mockNote.conclusion}</p>
-          </div>
-          {mockNote.visualAid && (
+      {generatedNote && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              {generatedNote.title}
+              <Button variant="outline" size="icon" onClick={handleDownload}>
+                <FileDown className="h-4 w-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold">Visual Aid:</h3>
-              <img
-                src={mockNote.visualAid}
-                alt="Visual aid for the topic"
-                className="mt-2 rounded-md"
-              />
+              <h3 className="font-semibold mb-2">Introduction</h3>
+              <p className="text-muted-foreground">{generatedNote.introduction}</p>
             </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">
-            <FileDown className="mr-2 h-4 w-4" />
-            Export as PDF
-          </Button>
-          <Button variant="outline">
-            <FileText className="mr-2 h-4 w-4" />
-            Export as Word
-          </Button>
-        </CardFooter>
-      </Card>
+
+            <div>
+              <h3 className="font-semibold mb-2">Main Points</h3>
+              <div className="space-y-4">
+                {generatedNote.mainPoints.map((point, index) => (
+                  <div key={index} className="space-y-2">
+                    <h4 className="font-medium">{point.heading}</h4>
+                    <p className="text-muted-foreground">{point.content}</p>
+                    {point.examples.length > 0 && (
+                      <div>
+                        <p className="font-medium text-sm">Examples:</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground">
+                          {point.examples.map((example, i) => (
+                            <li key={i}>{example}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Conclusion</h3>
+              <p className="text-muted-foreground">{generatedNote.conclusion}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

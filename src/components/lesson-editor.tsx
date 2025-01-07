@@ -1,14 +1,22 @@
 'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { FileDown, FileText } from "lucide-react";
+import 'react-quill/dist/quill.snow.css';
 
-const ReactQuill = dynamic(() => import("react-quill"), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>,
-});
+// Import ReactQuill only on client side with specific settings
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    // @ts-ignore
+    return function comp({ forwardedRef, ...props }) {
+      return <RQ ref={forwardedRef} {...props} />;
+    };
+  },
+  { ssr: false }
+);
 
 interface LessonEditorProps {
   initialContent?: string;
@@ -21,6 +29,21 @@ export function LessonEditor({ initialContent = "" }: LessonEditorProps) {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ font: [] }],
+      [{ size: [] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
 
   if (!isMounted) {
     return <div className="min-h-[500px] border rounded-lg p-4">Loading editor...</div>;
@@ -46,16 +69,8 @@ export function LessonEditor({ initialContent = "" }: LessonEditorProps) {
           theme="snow"
           value={content}
           onChange={setContent}
+          modules={modules}
           className="h-[450px]"
-          modules={{
-            toolbar: [
-              [{ header: [1, 2, 3, false] }],
-              ['bold', 'italic', 'underline', 'strike'],
-              [{ list: 'ordered' }, { list: 'bullet' }],
-              ['link', 'image'],
-              ['clean']
-            ]
-          }}
         />
       </div>
     </div>
